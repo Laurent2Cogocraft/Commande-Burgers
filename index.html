@@ -58,15 +58,20 @@ function getItemEl(item) {
 })();
 
 $("menu").addEventListener("click", (e) => {
-  const b = e.target.closest("button"); if (!b) return;
-  const it = b.dataset.i;
-  qty[it] = Math.max(0, (qty[it]||0) + (b.dataset.a === "inc" ? 1 : -1));
+  const b = e.target.closest("button"); 
+  if (!b) return;
   
-  const itemEl = getItemEl(it);
+  const it = b.dataset.i;
+  qty[it] = Math.max(0, (qty[it] || 0) + (b.dataset.a === "inc" ? 1 : -1));
+  
+  // Retrouve la carte du produit directement dans le DOM
+  const itemEl = b.closest(".item");
   if (itemEl) {
+    // Met à jour la quantité et la classe active
     itemEl.querySelector(".qn").textContent = qty[it];
     itemEl.classList.toggle("active", qty[it] > 0);
   }
+  
   refreshGoBtn();
 });
 
