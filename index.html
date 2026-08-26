@@ -157,8 +157,8 @@ $("menu").addEventListener("click", (e) => {
   const b = e.target.closest("button"); if (!b) return;
   const it = b.dataset.i;
   qty[it] = Math.max(0, (qty[it]||0) + (b.dataset.a === "inc" ? 1 : -1));
-  $(`[data-q="${CSS.escape(it)}"]`).textContent = qty[it];
-  document.querySelector(`.item[data-item="${CSS.escape(it)}"]`).classList.toggle("active", qty[it] > 0);
+  $(`[data-q="${encodeURIComponent(it)}"]`).textContent = qty[it];
+  document.querySelector(`.item[data-item="${encodeURIComponent(it)}"]`).classList.toggle("active", qty[it] > 0);
   refreshGoBtn();
 });
 
@@ -189,7 +189,7 @@ function editMine(){
   $("note").value = o.note || "";
   document.querySelectorAll(".item").forEach(el => {
     const it = el.dataset.item;
-    $(`[data-q="${CSS.escape(it)}"]`).textContent = qty[it] || 0;
+    $(`[data-q="${encodeURIComponent(it)}"]`).textContent = qty[it] || 0;
     el.classList.toggle("active", (qty[it]||0) > 0);
   });
   refreshGoBtn(); window.scrollTo({top:0,behavior:"smooth"});
@@ -199,7 +199,7 @@ function removeMine(){
   else { delete orders[myId]; render(); }
   for (const k in qty) delete qty[k];
   document.querySelectorAll(".item").forEach(el=>{ el.classList.remove("active");
-    $(`[data-q="${CSS.escape(el.dataset.item)}"]`).textContent = 0; });
+    $(`[data-q="${encodeURIComponent(el.dataset.item)}"]`).textContent = 0; });
   $("note").value = ""; refreshGoBtn();
 }
 $("clear").addEventListener("click", () => {
