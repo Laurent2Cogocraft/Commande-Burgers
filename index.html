@@ -1,108 +1,6 @@
-<!doctype html>
-<html lang="fr">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-<title>Commande du soir</title>
-<style>
-  :root { color-scheme: dark; }
-  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-  body { margin:0; background:#09090b; color:#f4f4f5;
-    font-family: ui-sans-serif, system-ui, -apple-system, sans-serif; }
-  .wrap { max-width: 460px; margin: 0 auto; padding: 24px 16px 48px; }
-  h1 { font-size: 26px; margin: 0; display:flex; align-items:center; gap:8px; }
-  .sub { color:#71717a; font-size:14px; margin: 4px 0 20px; }
-  .live { font-size:12px; color:#34d399; display:none; align-items:center; gap:5px; }
-  .live.on { display:inline-flex; }
-  .dot { width:7px; height:7px; border-radius:50%; background:#34d399; animation:pulse 1.4s infinite; }
-  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.3} }
-  .card { background:#18181b; border:1px solid #27272a; border-radius:18px; padding:16px; margin-bottom:20px; }
-  .row-head { display:flex; align-items:center; justify-content:space-between; margin-bottom:8px; }
-  .label { color:#a1a1aa; font-size:13px; }
-  input[type=text] { width:100%; background:#27272a; border:none; border-radius:10px;
-    padding:11px 12px; color:#f4f4f5; font-size:16px; outline:none; margin-bottom:12px; }
-  input[type=text]:focus { box-shadow:0 0 0 2px #f59e0b; }
-  .cat { font-size:11px; letter-spacing:.15em; text-transform:uppercase; color:#71717a; margin:10px 0 6px; }
-  .item { display:flex; align-items:center; justify-content:space-between;
-    background:rgba(63,63,70,.5); border-radius:10px; padding:5px 6px 5px 12px; margin-bottom:6px; }
-  .item .nm { font-size:14px; }
-  .item.active .nm { color:#fcd34d; font-weight:600; }
-  .stepper { display:flex; align-items:center; gap:5px; }
-  .stepper button { width:34px; height:34px; border:none; border-radius:8px; font-size:18px;
-    display:flex; align-items:center; justify-content:center; cursor:pointer; color:#f4f4f5; }
-  .minus { background:#3f3f46; } .minus:disabled { opacity:.3; }
-  .plus { background:#f59e0b; color:#18181b; font-weight:700; }
-  .qn { width:24px; text-align:center; font-variant-numeric:tabular-nums; font-size:14px; }
-  .go { width:100%; padding:14px; border:none; border-radius:12px; background:#f59e0b; color:#18181b;
-    font-size:15px; font-weight:700; cursor:pointer; }
-  .go:disabled { opacity:.35; cursor:not-allowed; }
-  .chips { display:flex; flex-wrap:wrap; gap:6px; }
-  .chip { font-size:14px; padding:5px 11px; border-radius:999px; background:#27272a; color:#e4e4e7;
-    display:inline-flex; align-items:center; gap:5px; }
-  .chip.me { background:#f59e0b; color:#18181b; }
-  .empty { color:#52525b; font-size:14px; }
-  .mine { background:rgba(16,185,129,.12); border:1px solid rgba(16,185,129,.3);
-    border-radius:12px; padding:12px; margin-bottom:20px; font-size:14px; display:none; }
-  .mine.on { display:block; }
-  .mine .acts { display:flex; gap:14px; }
-  .mine .acts button { background:none; border:none; color:#6ee7b7; font-size:13px; cursor:pointer; padding:0; }
-  .mine .acts button.rm { color:#a1a1aa; }
-  .ticket { background:#f4f4f5; color:#18181b; border-radius:18px; padding:16px; }
-  .ticket h2 { margin:0 0 12px; font-size:18px; }
-  .tline { display:flex; justify-content:space-between; font-family:ui-monospace,monospace; font-size:15px; padding:2px 0; }
-  .tsum { border-top:1px dashed #a1a1aa; margin-top:8px; padding-top:8px; display:flex;
-    justify-content:space-between; font-size:13px; color:#52525b; }
-  .copy { background:#18181b; color:#f4f4f5; border:none; border-radius:9px; padding:7px 12px;
-    font-size:14px; cursor:pointer; }
-  pre { background:#fafafa; border:1px solid #e4e4e7; border-radius:10px; padding:9px;
-    font-size:11px; line-height:1.45; white-space:pre-wrap; color:#3f3f46; margin:12px 0 0; user-select:all; }
-  .clear { width:100%; background:none; border:none; color:#a1a1aa; font-size:12px; margin-top:10px; cursor:pointer; }
-  .banner { background:rgba(245,158,11,.12); border:1px solid rgba(245,158,11,.35); color:#fcd34d;
-    border-radius:12px; padding:12px; font-size:14px; margin-bottom:20px; }
-</style>
-</head>
-<body>
-<div class="wrap">
-  <div class="row-head">
-    <h1>🍔 Commande du soir</h1>
-    <span class="live" id="live"><span class="dot"></span>en direct</span>
-  </div>
-  <p class="sub">Commande depuis ton tél. Tout le monde voit le total se remplir.</p>
-
-  <div class="banner" id="banner" style="display:none"></div>
-
-  <div class="card">
-    <div class="row-head"><span class="label">👥 Ont commandé (<span id="count">0</span>)</span></div>
-    <div class="chips" id="roster"><span class="empty">Personne pour l'instant.</span></div>
-  </div>
-
-  <div class="mine" id="mine"></div>
-
-  <div class="card">
-    <input type="text" id="name" placeholder="Ton prénom" autocomplete="off">
-    <div id="menu"></div>
-    <input type="text" id="note" placeholder="Note (sans oignon, allergie…) — optionnel" autocomplete="off">
-    <button class="go" id="go" disabled>Choisis au moins un plat</button>
-  </div>
-
-  <div class="ticket" id="ticket" style="display:none">
-    <div class="row-head"><h2>Commande complète</h2><button class="copy" id="copy">Copier</button></div>
-    <div id="totals"></div>
-    <div class="tsum"><span id="pers">0 pers.</span><span id="grand">0 articles</span></div>
-    <pre id="pre"></pre>
-    <button class="clear" id="clear">Vider tout (une fois la commande passée)</button>
-  </div>
-</div>
-
-<!-- ═══════════ FIREBASE ═══════════ -->
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
 <script>
-/* ┌─────────────────────────────────────────────────────────────┐
-   │  1. COLLE ICI la config de TON projet Firebase.             │
-   │     (Firebase console → Paramètres du projet → tes apps →   │
-   │      icône Web </> → "firebaseConfig")                       │
-   └─────────────────────────────────────────────────────────────┘ */
 const firebaseConfig = {
   apiKey: "AIzaSyC18Oi2qDrm03k1LrRjHtUy_HZBqTyqPN0",
   authDomain: "bouffe-rp-kitchen.firebaseapp.com",
@@ -112,7 +10,6 @@ const firebaseConfig = {
   messagingSenderId: "1004880872442",
   appId: "1:1004880872442:web:e2b36bf10601db1ea59a43"
 };
-/* ─────────────────────────────────────────────────────────────── */
 
 const MENU = {
   "Burgers": ["Single","Double","OG Bacon","Spicy Chicken","Guacamole","The Kitchen","Big Mac"],
@@ -122,20 +19,27 @@ const ALL = Object.values(MENU).flat();
 
 let db = null, ordersRef = null, orders = {}, connected = false;
 try {
-  if (!firebaseConfig.apiKey.startsWith("____")) {
+  if (firebaseConfig.apiKey && !firebaseConfig.apiKey.startsWith("____")) {
     firebase.initializeApp(firebaseConfig);
     db = firebase.database();
     ordersRef = db.ref("orders");
     connected = true;
   }
-} catch (e) { connected = false; }
+} catch (e) { 
+  console.error("Erreur Firebase:", e);
+  connected = false; 
+}
 
 const $ = (id) => document.getElementById(id);
 let myId = localStorage.getItem("myId") || ("o_"+Date.now()+"_"+Math.random().toString(36).slice(2,7));
 localStorage.setItem("myId", myId);
 const qty = {};
 
-// ---- Construit le menu (une fois) ----
+// Helper pour trouver un élément par data-attribute proprement
+function getItemEl(item) {
+  return document.querySelector(`.item[data-item="${CSS.escape(item)}"]`);
+}
+
 (function buildMenu(){
   let html = "";
   for (const [cat, items] of Object.entries(MENU)) {
@@ -145,7 +49,7 @@ const qty = {};
         <span class="nm">${it}</span>
         <div class="stepper">
           <button class="minus" data-a="dec" data-i="${it}">−</button>
-          <span class="qn" data-q="${it}">0</span>
+          <span class="qn">0</span>
           <button class="plus" data-a="inc" data-i="${it}">+</button>
         </div></div>`;
     }
@@ -157,8 +61,12 @@ $("menu").addEventListener("click", (e) => {
   const b = e.target.closest("button"); if (!b) return;
   const it = b.dataset.i;
   qty[it] = Math.max(0, (qty[it]||0) + (b.dataset.a === "inc" ? 1 : -1));
-  $(`[data-q="${encodeURIComponent(it)}"]`).textContent = qty[it];
-  document.querySelector(`.item[data-item="${encodeURIComponent(it)}"]`).classList.toggle("active", qty[it] > 0);
+  
+  const itemEl = getItemEl(it);
+  if (itemEl) {
+    itemEl.querySelector(".qn").textContent = qty[it];
+    itemEl.classList.toggle("active", qty[it] > 0);
+  }
   refreshGoBtn();
 });
 
@@ -179,7 +87,7 @@ $("go").addEventListener("click", () => {
   localStorage.setItem("myName", name);
   const order = { name, items, note: $("note").value.trim(), ts: Date.now() };
   if (connected) { ordersRef.child(myId).set(order); }
-  else { orders[myId] = order; render(); }  // secours local si pas de base
+  else { orders[myId] = order; render(); }
 });
 
 function editMine(){
@@ -187,47 +95,57 @@ function editMine(){
   for (const k in qty) delete qty[k];
   for (const [it,n] of Object.entries(o.items)) qty[it] = n;
   $("note").value = o.note || "";
+  
   document.querySelectorAll(".item").forEach(el => {
     const it = el.dataset.item;
-    $(`[data-q="${encodeURIComponent(it)}"]`).textContent = qty[it] || 0;
-    el.classList.toggle("active", (qty[it]||0) > 0);
+    const count = qty[it] || 0;
+    el.querySelector(".qn").textContent = count;
+    el.classList.toggle("active", count > 0);
   });
   refreshGoBtn(); window.scrollTo({top:0,behavior:"smooth"});
 }
+
 function removeMine(){
   if (connected) ordersRef.child(myId).remove();
   else { delete orders[myId]; render(); }
   for (const k in qty) delete qty[k];
-  document.querySelectorAll(".item").forEach(el=>{ el.classList.remove("active");
-    $(`[data-q="${encodeURIComponent(el.dataset.item)}"]`).textContent = 0; });
+  document.querySelectorAll(".item").forEach(el => {
+    el.classList.remove("active");
+    el.querySelector(".qn").textContent = 0;
+  });
   $("note").value = ""; refreshGoBtn();
 }
+
 $("clear").addEventListener("click", () => {
   if (!confirm("Vider TOUTES les commandes du groupe ?")) return;
   if (connected) ordersRef.remove(); else { orders = {}; render(); }
 });
 
-// ---- Synchro temps réel ----
+// Synchro temps réel
 if (connected) {
   $("live").classList.add("on");
-  ordersRef.on("value", (snap) => { orders = snap.val() || {}; render(); });
+  ordersRef.on("value", (snap) => { 
+    orders = snap.val() || {}; 
+    render(); 
+  }, (err) => {
+    console.error("Erreur d'accès Firebase:", err);
+    $("banner").style.display = "block";
+    $("banner").innerHTML = "<b>Erreur Firebase :</b> Vérifiez les règles de sécurité dans votre console Firebase.";
+  });
 } else {
   $("banner").style.display = "block";
-  $("banner").innerHTML = "<b>Base non configurée.</b> Colle ta config Firebase dans le fichier pour activer la synchro entre téléphones. En attendant, les commandes restent sur cet appareil.";
+  $("banner").innerHTML = "<b>Mode hors-ligne :</b> Base de données non connectée.";
   render();
 }
 
-// ---- Rendu ----
 function render(){
   const list = Object.entries(orders).map(([id,o]) => ({id, ...o}))
-                     .sort((a,b)=>(a.ts||0)-(b.ts||0));
-  // Roster
+                                     .sort((a,b)=>(a.ts||0)-(b.ts||0));
   $("count").textContent = list.length;
   $("roster").innerHTML = list.length
     ? list.map(o => `<span class="chip ${o.id===myId?'me':''}">✓ ${esc(o.name)}</span>`).join("")
     : `<span class="empty">Personne pour l'instant.</span>`;
 
-  // Ma commande
   const mine = orders[myId];
   const mineBox = $("mine");
   if (mine) {
@@ -239,7 +157,6 @@ function render(){
         <div style="color:#d4d4d8;margin-top:4px">${itemsLine(mine)}</div>`;
   } else { mineBox.classList.remove("on"); mineBox.innerHTML = ""; }
 
-  // Totaux
   const totals = {};
   for (const o of list) for (const [it,n] of Object.entries(o.items)) totals[it]=(totals[it]||0)+n;
   const grand = Object.values(totals).reduce((a,b)=>a+b,0);
@@ -260,6 +177,7 @@ $("mine").addEventListener("click",(e)=>{
 function itemsLine(o){
   return Object.entries(o.items).map(([i,n])=>`${n}× ${esc(i)}`).join(", ") + (o.note?` (${esc(o.note)})`:"");
 }
+
 function summary(list, totals, grand){
   if (!list.length) return "";
   const d = new Date().toLocaleDateString("fr-FR",{weekday:"long",day:"numeric",month:"long"});
@@ -272,12 +190,14 @@ function summary(list, totals, grand){
   }
   return s;
 }
+
 $("copy").addEventListener("click", async () => {
-  try { await navigator.clipboard.writeText($("pre").textContent);
-    $("copy").textContent = "Copié ✓"; setTimeout(()=>$("copy").textContent="Copier",1500);
+  try { 
+    await navigator.clipboard.writeText($("pre").textContent);
+    $("copy").textContent = "Copié ✓"; 
+    setTimeout(()=>$("copy").textContent="Copier",1500);
   } catch(e){}
 });
+
 function esc(s){ return String(s).replace(/[<>&]/g, c => ({'<':'&lt;','>':'&gt;','&':'&amp;'}[c])); }
 </script>
-</body>
-</html>
